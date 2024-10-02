@@ -76,6 +76,7 @@ class LinearRegression:
             self.losses.append(loss)
     
     def predict(self, X):
+        print(f'111{self.weights}')
         return np.dot(X, self.weights)
 
 
@@ -114,7 +115,7 @@ if __name__ == "__main__":
                 y_normalized, y_mean, y_max = LinearRegression().mean_normalize(y_train.reshape(-1, 1))
                 y_normalized = y_normalized.flatten()
 
-        model = LinearRegression(learning_rate=1, epochs=1000)
+        model = LinearRegression(learning_rate=0.1, epochs=1000)
 
         # 使用批量梯度下降（BGD）进行训练
         model.bgd(X_normalized, y_normalized)
