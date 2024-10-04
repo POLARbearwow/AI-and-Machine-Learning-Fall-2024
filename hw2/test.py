@@ -44,6 +44,8 @@ class LinearRegression:
             
             loss = self.mean_squared_error(y, np.dot(X, self.weights))
             self.losses.append(loss)
+            if epoch % 100 == 0:
+                print(f'Epoch {epoch}: Weights {self.weights}, Loss {loss}')
     
     def bgd(self, X, y):
         m, n = X.shape
@@ -57,6 +59,8 @@ class LinearRegression:
             
             loss = self.mean_squared_error(y, y_pred)
             self.losses.append(loss)
+            if epoch % 100 == 0:
+                print(f'Epoch {epoch}: Weights {self.weights}, Loss {loss}')
     
     def mbgd(self, X, y, batch_size):
         m, n = X.shape
@@ -74,10 +78,19 @@ class LinearRegression:
             
             loss = self.mean_squared_error(y, np.dot(X, self.weights))
             self.losses.append(loss)
+            if epoch % 100 == 0:
+                print(f'Epoch {epoch}: Weights {self.weights}, Loss {loss}')
     
     def predict(self, X):
-        print(f'111{self.weights}')
         return np.dot(X, self.weights)
+
+    def reverse_weights(self, X_min, X_max):
+        # 如果进行了归一化，则需要对权重进行反归一化处理
+        w_0 = self.weights[0]  # 截距项
+        w_1_to_n = self.weights[1:]  # 斜率项
+        w_1_to_n_original = w_1_to_n / (X_max[1:] - X_min[1:])  # 反归一化斜率
+        w_0_original = w_0 - np.sum(w_1_to_n_original * X_min[1:])  # 反归一化截距
+        return np.concatenate([[w_0_original], w_1_to_n_original])  # 返回反归一化后的权重
 
 
 if __name__ == "__main__":
@@ -99,23 +112,26 @@ if __name__ == "__main__":
 
     all_fitted_lines = {}
 
+    # 测试不同的归一化方法
     for norm_method, values in normalization_methods.items():
         print(f"\nTesting with {norm_method} normalization...")
 
         if norm_method == 'None':
             # 'None' 归一化不需要 X_min 和 X_max
             X_normalized, y_normalized = values
+            X_min, X_max = None, None
+            model = LinearRegression(learning_rate=0.00001, epochs=1000)  # 使用较小的学习率
         else:
             X_normalized, X_min, X_max = values
             # 对 y_train 也进行归一化处理（如果是 Min-Max 或 Mean 归一化）
             if norm_method == 'Min-Max':
                 y_normalized, y_min, y_max = LinearRegression().min_max_normalize(y_train.reshape(-1, 1))
-                y_normalized = y_normalized.flatten()
+                y_normalized = y_normalized.flatten()  # 保证 y_normalized 是一维的
             elif norm_method == 'Mean':
                 y_normalized, y_mean, y_max = LinearRegression().mean_normalize(y_train.reshape(-1, 1))
-                y_normalized = y_normalized.flatten()
+                y_normalized = y_normalized.flatten()  # 保证 y_normalized 是一维的
 
-        model = LinearRegression(learning_rate=0.1, epochs=1000)
+            model = LinearRegression(learning_rate=0.1, epochs=1000)
 
         # 使用批量梯度下降（BGD）进行训练
         model.bgd(X_normalized, y_normalized)
@@ -129,19 +145,34 @@ if __name__ == "__main__":
         elif norm_method == 'Mean':
             y_pred = y_pred * (y_max - y_min) + y_mean
 
-        all_fitted_lines[norm_method] = y_pred
+        # 对权重进行反归一化
+        if norm_method != 'None':
+            final_weights_original = model.reverse_weights(X_min, X_max)
+            print(f"Final weights (original scale) for {norm_method}: {final_weights_original}")
+            
+            # 根据反归一化的权重绘制拟合曲线
+            slope = final_weights_original[1]
+            intercept = final_weights_original[0]
+            y_fitted = slope * X_train + intercept
+        else:
+            print(f"Final weights (original scale) for {norm_method}: {model.weights}")
+            slope = model.weights[1]
+            intercept = model.weights[0]
+            y_fitted = slope * X_train + intercept
+
+        all_fitted_lines[norm_method] = y_fitted
 
     # 绘制不同归一化方法的拟合结果在一张图中
     fig, ax = plt.subplots()
     ax.scatter(X_train, y_train, color='blue', label='Original data')
     
     # 依次绘制每种归一化方法的结果，包括 None 归一化
-    for norm_method, y_pred in all_fitted_lines.items():
-        ax.plot(X_train, y_pred, label=f'{norm_method} Normalization')
+    for norm_method, y_fitted in all_fitted_lines.items():
+        ax.plot(X_train, y_fitted, label=f'{norm_method} Normalization')
 
     ax.set_xlabel('X')
     ax.set_ylabel('y')
-    ax.set_title('Linear Regression Fit with Different Normalization Methods')
+    ax.set_title('Linear Regression Fit with Reversed Weights')
     ax.legend()
     ax.grid(True)
 
