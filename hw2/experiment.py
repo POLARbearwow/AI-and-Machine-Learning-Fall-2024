@@ -46,15 +46,14 @@ def main():
                 y_normalized = y_normalized.flatten()
                 model = LinearRegression(learning_rate2, epochs)
         
-        model.mbgd(X_normalized, y_normalized, batch_size=10)
+        #model.mbgd(X_normalized, y_normalized, batch_size=10)
         #model.sgd(X_normalized, y_normalized)
 
         all_losses[norm_method] = model.losses
         
-        # 保存每种归一化方法的预测结果
         y_pred = model.predict(X_normalized)
 
-        # 如果归一化了 y_train，则进行反归一化处理
+        # 进行反归一化处理
         if norm_method == 'Min-Max':
             y_pred = y_pred * (y_max - y_min) + y_min
         elif norm_method == 'Mean':
