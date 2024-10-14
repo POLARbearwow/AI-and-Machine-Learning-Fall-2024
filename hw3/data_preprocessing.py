@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
@@ -14,16 +15,27 @@ def load_and_preprocess_data(file_path):
     
     X = df.drop('Class', axis=1).values
     y = df['Class'].values
-    
+
+    # 将标签 2 转换为 0
+
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
     
-    print(df)
+    y_train = np.where(y_train == 2, -1, y_train)
+    y_test = np.where(y_test == 2, -1, y_test)
+    
+    # print(df)
+    # print('-------------------------------------------------------------------')
+    # print(f"X_train shape: {X_train.shape}")
+    # print(X_train)
+    # print('-------------------------------------------------------------------')
+    # print(f"X_test shape: {X_test.shape}")
+    # print(X_test)
+    
+        # 打印标签的唯一值
+    # print('-------------------------------------------------------------------')
+    # print("y_train 的唯一值:", np.unique(y_train))
+    # print("y_test 的唯一值:", np.unique(y_test))
     
     return X_train, X_test, y_train, y_test
-    
-    # print("训练集特征数据:", X_train)
-    # print("测试集特征数据:", X_test)
-    # print("训练集标签数据:", y_train)
-    # print("测试集标签数据:", y_test)
-    
-#load_and_preprocess_data('hw3/wine.data')
+
+load_and_preprocess_data('hw3/wine.data')
