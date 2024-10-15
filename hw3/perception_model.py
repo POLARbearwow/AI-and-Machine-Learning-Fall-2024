@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 class PerceptronBGD:
-    def __init__(self, n_features, lr=0.1, n_iter=100, tol=0.001, patience=10):
+    def __init__(self, n_features, lr=0.1, n_iter=100, tol=8, patience=10):
         self.lr = lr  # 学习率
         self.n_iter = n_iter  # 最大迭代次数
         self.tol = tol  # 提前停止的容忍度
@@ -74,13 +74,15 @@ class PerceptronBGD:
 #------------------------------------SGD-------------------------------------
 
 class PerceptronSGD:
-    def __init__(self, n_features, lr=1, n_iter=100, tol=0.00001, patience=10):
+    def __init__(self, n_features, lr=1, n_iter=100, tol=10, patience=10):
         print('-------------------------------- Learning rate:', lr)
         self.lr = lr  # Learning rate
         self.n_iter = n_iter  # Maximum number of iterations
         self.tol = tol  # Tolerance for early stopping
         self.patience = patience  # Patience for early stopping
         self.weights = np.random.randn(n_features + 1) * 0.05  # Model parameters (include bias term)
+        #self.weights = np.zeros(n_features + 1) * 0.05  # Model parameters (include bias term)
+
         self.losses = []  # Track loss over time
 
     def loss(self, y_true, y_pred):

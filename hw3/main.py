@@ -12,7 +12,7 @@ def main():
 
     # 批量梯度下降感知机
     print("训练批量梯度下降感知机...")
-    model_bgd = PerceptronBGD(n_features=X_train.shape[1], lr=0.005, n_iter=10000)
+    model_bgd = PerceptronBGD(n_features=X_train.shape[1], lr=0.0008, n_iter=5000)
     model_bgd.fit(X_train, y_train)
     y_pred_bgd = model_bgd.predict(X_test)
     evaluate_model(y_test, y_pred_bgd, "Batch Perceptron")
@@ -20,7 +20,7 @@ def main():
 
     # 随机梯度下降感知机
     print("训练随机梯度下降感知机...")
-    model_sgd = PerceptronSGD(n_features=X_train.shape[1], lr=0.0005, n_iter=5000)
+    model_sgd = PerceptronSGD(n_features=X_train.shape[1], lr=0.5, n_iter=5000)
     model_sgd.fit(X_train, y_train)
     y_pred_sgd = model_sgd.predict(X_test)
     evaluate_model(y_test, y_pred_sgd, "Stochastic Perceptron")
