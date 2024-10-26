@@ -2,31 +2,34 @@
 import numpy as np
 from data_preprocessing import load_and_preprocess_data
 from evaluation import evaluate_model
-from perception_model import PerceptronBGD, PerceptronSGD, plot_losses
+from logistic_regression import LogisticRegressionMiniBatch, LogisticRegressionSGD, plot_losses
 
 
 def main():
-    # 加载和预处理数据
-    file_path = 'hw3/wine.data'  # 数据路径
+    # Load and preprocess data
+    file_path = 'hw4/wine.data'  # Data path
     X_train, X_test, y_train, y_test = load_and_preprocess_data(file_path)
 
-    # 批量梯度下降感知机
-    print("训练批量梯度下降感知机...")
-    model_bgd = PerceptronBGD(n_features=X_train.shape[1], lr=0.0008, n_iter=5000)
-    model_bgd.fit(X_train, y_train)
-    y_pred_bgd = model_bgd.predict(X_test)
-    evaluate_model(y_test, y_pred_bgd, "Batch Perceptron")
-    #model_bgd.plot_loss()  
-
-    # 随机梯度下降感知机
-    print("训练随机梯度下降感知机...")
-    model_sgd = PerceptronSGD(n_features=X_train.shape[1], lr=0.5, n_iter=5000)
+    # Mini-Batch Gradient Descent Logistic Regression
+    print("Training logistic regression with mini-batch gradient descent...")
+    model_mbgd = LogisticRegressionMiniBatch(n_features=X_train.shape[1], lr=1e-5, n_iter=5000,tol=0.01)
+    model_mbgd.fit(X_train, y_train)
+    y_pred_bgd = model_mbgd.predict(X_test)
+    evaluate_model(y_test, y_pred_bgd, "Mini-Batch Logistic Regression")
+    
+    
+    # Stochastic Gradient Descent Logistic Regression
+    print("Training logistic regression with stochastic gradient descent...")
+    model_sgd = LogisticRegressionSGD(n_features=X_train.shape[1], lr=5e-6, n_iter=5000,tol=0.5)
     model_sgd.fit(X_train, y_train)
     y_pred_sgd = model_sgd.predict(X_test)
-    evaluate_model(y_test, y_pred_sgd, "Stochastic Perceptron")
-    #model_sgd.plot_loss()  
+    evaluate_model(y_test, y_pred_sgd, "Stochastic Logistic Regression")
     
-    plot_losses(model_bgd.losses, model_sgd.losses)
+    plot_losses(model_mbgd.losses, model_sgd.losses)
+    
+    # print("Mini-Batch Losses:", model_mbgd.losses)
+    # print("Stochastic Losses:", model_sgd.losses)
+    
 
 if __name__ == '__main__':
     main()
