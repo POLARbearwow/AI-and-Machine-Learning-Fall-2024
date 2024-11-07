@@ -11,14 +11,14 @@ x, y = generate_complex_regression_data(num_samples=200, noise=0.2)
 
 # 设置不同的超参数组合，尝试找到最佳模型
 layer_configs = [
-    [1, 10, 10, 10, 1],  # 三个隐藏层，各有10个神经元
+    [1, 20, 20, 20, 1],  # 三个隐藏层，各有10个神经元
 ]
 
 # 设置不同的 epochs 和 learning_rate
 sgd_epochs = 50
-sgd_learning_rate = 0.0001
+sgd_learning_rate = 0.01
 mbgd_epochs = 100
-mbgd_learning_rate = 0.00001
+mbgd_learning_rate = 0.01
 
 batch_sizes = [1, 16]
 k_folds = 5
