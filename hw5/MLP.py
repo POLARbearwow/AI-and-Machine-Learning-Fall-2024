@@ -6,32 +6,32 @@ class MLP:
     #     self.weights = [np.random.randn(layer_sizes[i], layer_sizes[i + 1]) for i in range(len(layer_sizes) - 1)]
     #     self.biases = [np.random.randn(1, layer_sizes[i + 1]) for i in range(len(layer_sizes) - 1)]
     
-    def __init__(self, layer_sizes):
-            # Xavier 初始化
-        self.weights = [np.random.randn(layer_sizes[i], layer_sizes[i + 1]) * np.sqrt(1. / layer_sizes[i]) 
-                        for i in range(len(layer_sizes) - 1)]
-        self.biases = [np.zeros((1, layer_sizes[i + 1])) for i in range(len(layer_sizes) - 1)]
-    
     # def __init__(self, layer_sizes):
-    #     # 使用 He 初始化
-    #     self.weights = [np.random.randn(layer_sizes[i], layer_sizes[i + 1]) * np.sqrt(2. / layer_sizes[i]) 
+    #         # Xavier 初始化
+    #     self.weights = [np.random.randn(layer_sizes[i], layer_sizes[i + 1]) * np.sqrt(1. / layer_sizes[i]) 
     #                     for i in range(len(layer_sizes) - 1)]
     #     self.biases = [np.zeros((1, layer_sizes[i + 1])) for i in range(len(layer_sizes) - 1)]
     
-    # def relu(self, x):
-    #     # ReLU 激活函数
-    #     return np.maximum(0, x)
+    def __init__(self, layer_sizes):
+        # 使用 He 初始化
+        self.weights = [np.random.randn(layer_sizes[i], layer_sizes[i + 1]) * np.sqrt(2. / layer_sizes[i]) 
+                        for i in range(len(layer_sizes) - 1)]
+        self.biases = [np.zeros((1, layer_sizes[i + 1])) for i in range(len(layer_sizes) - 1)]
+    
+    def relu(self, x):
+        # ReLU 激活函数
+        return np.maximum(0, x)
 
-    # def relu_derivative(self, x):
-    #     # ReLU 函数的导数
-    #     return np.where(x > 0, 1, 0)
+    def relu_derivative(self, x):
+        # ReLU 函数的导数
+        return np.where(x > 0, 1, 0)
 
-    #leaky relu
-    def relu(self, x, alpha=0.01):
-        return np.where(x > 0, x, alpha * x)
+    # #leaky relu
+    # def relu(self, x, alpha=0.01):
+    #     return np.where(x > 0, x, alpha * x)
 
-    def relu_derivative(self, x, alpha=0.01):
-        return np.where(x > 0, 1, alpha)
+    # def relu_derivative(self, x, alpha=0.01):
+    #     return np.where(x > 0, 1, alpha)
 
 
     # def forward(self, x):
