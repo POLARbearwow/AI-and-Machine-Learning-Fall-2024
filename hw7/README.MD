@@ -1,0 +1,3 @@
+1. Read and understand a decision tree and its visualization code;
+2. Use a portion of the data as the test dataset, and verify the classification performance of the decision tree using the test dataset. Evaluate using accuracy as the metric.
+3. During the code execution, you may encounter issues with the graphviz environment in the decision tree visualization part. Depending on your computer's operating system, you can search online for how to install graphviz and configure the correct path.
