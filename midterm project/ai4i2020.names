@@ -1,0 +1,27 @@
+UID: Unique identifier for each data point in the dataset, ranging from 1 to 10000.
+
+Product ID: The product identifier, consisting of a letter (L, M, H) representing low, medium, or high quality variants and a variant-specific serial number.
+
+Type: 
+
+Air temperature (K): Temperature of the air, generated using a random walk process with a standard deviation of 2 K around 300 K.
+
+Process temperature (K): Temperature of the process, generated using a random walk process with a standard deviation of 1 K, added to the air temperature plus 10 K.
+
+Rotational speed (rpm): Rotational speed of the machine, calculated from a power of 2860 W, overlaid with normally distributed noise.
+
+Torque (Nm): Torque applied to the machine, normally distributed around 40 Nm with a standard deviation of 10 Nm (no negative values).
+
+Tool wear (min): Duration of tool wear, with additional wear time added depending on the product quality (5 minutes for H, 3 for M, 2 for L).
+
+Machine failure: Label indicating whether a machine failure occurred (1 = failure, 0 = no failure). The failure can be caused by:
+    
+    - Tool wear failure (TWF): Tool failure due to excessive wear (120 cases in the dataset).
+    
+    - Heat dissipation failure (HDF): Failure due to inadequate heat dissipation when the air-to-process temperature difference is less than 8.6 K and rotational speed is below 1380 rpm (115 cases).
+    
+    - Power failure (PWF): Failure when the product of torque and rotational speed is outside the required power range (below 3500 W or above 9000 W) (95 cases).
+    
+    - Overstrain failure (OSF): Failure when the product of tool wear and torque exceeds a specific threshold for each product variant (98 cases).
+    
+    - Random failure (RNF): Random failure with a 0.1% chance for each process (5 cases).
