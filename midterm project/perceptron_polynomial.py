@@ -95,11 +95,10 @@ class MBGDPerceptron:
 # 读取数据和预处理（假设 X_train, X_test, y_train, y_test 已经从前面得到）
 
 # 生成多项式特征
-poly = PolynomialFeatures(degree=3, include_bias=False)  # 二次多项式特征扩展
-X_train_poly = poly.fit_transform(X_train)  # 对训练数据扩展特征
-X_test_poly = poly.transform(X_test)        # 对测试数据扩展特征
+poly = PolynomialFeatures(degree=3, include_bias=False) 
+X_train_poly = poly.fit_transform(X_train)  
+X_test_poly = poly.transform(X_test)        
 
-# 将目标变量转换为感知机需要的格式 (+1 和 -1)
 y_train_perceptron = np.where(y_train == 1, 1, -1)
 y_test_perceptron = np.where(y_test == 1, 1, -1)
 

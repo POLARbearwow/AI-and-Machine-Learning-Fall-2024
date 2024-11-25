@@ -71,7 +71,7 @@ class LogisticRegressionMiniBatch:
         X = np.hstack([np.ones((m, 1)), X])  # 添加偏置项
         return X
 
-    def _update_weights(self, X, y):
+    def _update_weights(self, X, y):65 
         '''更新权重并训练模型'''
         no_improvement = 0
         for epoch in range(self.n_iter):
