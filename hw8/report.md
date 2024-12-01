@@ -6,4 +6,4 @@ The implementation begins with data preprocessing, where the 8x8 pixel image fea
 
 The MLP model achieved high performance with 96% accuracy, precision, recall, and F1 score. The loss curve shows rapid convergence and stabilization, indicating efficient learning and a well-fitted model.
 
-[View the code on GitHub]()
+[View the code on GitHub](https://github.com/POLARbearwow/AI-and-Machine-Learning-Fall-2024/tree/main/hw8)
