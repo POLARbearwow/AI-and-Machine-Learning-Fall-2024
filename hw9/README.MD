@@ -29,3 +29,7 @@ The Wine dataset can be found at the UCI Machine Learning Repository: [Wine Data
 - Train the autoencoder on the Wine dataset.
 - Reconstruct the data using the trained non-linear autoencoder.
 - Visualize the output of the encoder; calculate and report the reconstruction error.
+
+### 4. Comparison and Analysis:
+   - Compare the reconstruction errors of the PCA, linear autoencoder, and non-linear autoencoder.
+   - Analyze the results and discuss which method provides the best reconstruction accuracy and why.
