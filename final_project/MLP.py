@@ -1,57 +1,48 @@
 import numpy as np
-import math
+import pandas as pd
+from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
+import math
 
-# 数据加载函数
-def load_data(train_path, test_path):
-    # 加载训练和测试数据集
-    train_data = np.loadtxt(train_path, delimiter=',')
-    test_data = np.loadtxt(test_path, delimiter=',')
-    
-    # 分离特征（X）和标签（y）
-    X_train, y_train = train_data[:, :-1], train_data[:, -1]
-    X_test, y_test = test_data[:, :-1], test_data[:, -1]
-    
-    return X_train, y_train, X_test, y_test
+# ----------------------------- 数据加载与处理 ----------------------------- #
+# 1. 读取数据
+data = pd.read_csv('final_project/seeds_dataset.txt', delim_whitespace=True, header=None)
 
-# 数据归一化函数
-def normalize_data(X):
-    # 将特征归一化到 0-1 范围
-    return (X - np.min(X, axis=0)) / (np.max(X, axis=0) - np.min(X, axis=0))
+# 2. 设置列名
+columns = [
+    "area", "perimeter", "compactness", "length_of_kernel",
+    "width_of_kernel", "asymmetry_coefficient", "length_of_kernel_groove", "class_label"
+]
+data.columns = columns
 
-# 标签独热编码函数
+# 3. 将 class_label 转换为 0, 1, 2 的格式
+data['class_label'] = data['class_label'] - 1  # 转换为从 0 开始的类别标签
+
+# 4. 特征和标签分离
+X = data.drop(['class_label'], axis=1).values  # 特征
+y = data['class_label'].values  # 标签
+
+# 5. 数据划分（70%训练集，30%测试集）
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42, stratify=y)
+
+# 6. 标准化特征
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+# 7. 将标签转换为独热编码格式
 def one_hot_encode(labels, num_classes):
-    # 将标签转换为独热编码格式
     one_hot = np.zeros((labels.size, num_classes))
-    one_hot[np.arange(labels.size), labels.astype(int)] = 1
+    one_hot[np.arange(labels.size), labels] = 1
     return one_hot
 
-# 数据预处理
-def preprocess_data(train_path, test_path, num_classes):
-    # 加载数据
-    X_train, y_train, X_test, y_test = load_data(train_path, test_path)
-    
-    # 归一化数据
-    X_train = normalize_data(X_train)
-    X_test = normalize_data(X_test)
-    
-    # 独热编码标签
-    y_train_one_hot = one_hot_encode(y_train, num_classes)
-    y_test_one_hot = one_hot_encode(y_test, num_classes)
-    
-    return X_train, y_train_one_hot, X_test, y_test_one_hot, y_train, y_test
+num_classes = len(np.unique(y))  # 自动确定类别数
+y_train_one_hot = one_hot_encode(y_train, num_classes)
+y_test_one_hot = one_hot_encode(y_test, num_classes)
 
-# 数据集文件路径
-train_file = './your_train_file.csv'  # 替换为你的训练数据路径
-test_file = './your_test_file.csv'    # 替换为你的测试数据路径
-
-# 定义类别数
-num_classes = 3  # 替换为你的数据集类别数量
-
-# 调用数据预处理函数
-X_train, y_train_one_hot, X_test, y_test_one_hot, y_train, y_test = preprocess_data(train_file, test_file, num_classes)
-
+# ----------------------------- MLP 实现 ----------------------------- #
 class MLP:
     def __init__(self, units, activs):
         self.units = units
@@ -137,10 +128,9 @@ class MLP:
         y_pred_prob = self.predict_proba(X_test)
         return np.argmax(y_pred_prob, axis=1)
 
-# ------------ 模型初始化与训练 ------------
-
+# ----------------------------- 模型初始化与训练 ----------------------------- #
 # 定义模型结构和激活函数
-units = [X_train.shape[1], 128, 64, num_classes]  # 输入层, 隐藏层, 输出层
+units = [X_train.shape[1], 128, 64, num_classes]  # 输入层 -> 隐藏层1 -> 隐藏层2 -> 输出层
 activations = ["relu", "relu", "softmax"]
 
 # 初始化 MLP 模型
@@ -150,11 +140,53 @@ mlp = MLP(units, activations)
 mlp.fit(
     X_train, y_train_one_hot,
     lr=0.01,
-    max_iters=1000,
+    max_iters=20000,
     batch_size=32
 )
 
-# 测试模型
+# -------------------- 模型评估 -------------------- #
+# 获取预测值
 y_pred = mlp.predict(X_test)
-accuracy = np.mean(y_pred == y_test)
-print(f"Test Accuracy: {accuracy * 100:.2f}%")
+
+# 计算评估指标
+accuracy = accuracy_score(y_test, y_pred)
+precision = precision_score(y_test, y_pred, average='macro')
+recall = recall_score(y_test, y_pred, average='macro')
+f1 = f1_score(y_test, y_pred, average='macro')
+
+print(f"Accuracy: {accuracy:.4f}")
+print(f"Precision: {precision:.4f}")
+print(f"Recall: {recall:.4f}")
+print(f"F1 Score: {f1:.4f}")
+
+# -------------------- 绘制子图 -------------------- #
+fig, axs = plt.subplots(1, 2, figsize=(12, 6), gridspec_kw={'width_ratios': [1,1]})
+
+# 子图1：Loss 曲线
+axs[0].plot(range(1, len(mlp.losses) + 1), mlp.losses, label="Training Loss", color='blue')
+axs[0].set_title("MLP Loss Curve", fontsize=16)
+axs[0].set_xlabel("Epoch", fontsize=12)
+axs[0].set_ylabel("Loss", fontsize=12)
+axs[0].grid(True)
+axs[0].legend()
+
+# 子图2：评估指标柱状图
+metrics = ["Accuracy", "Precision", "Recall", "F1 Score"]
+values = [accuracy, precision, recall, f1]
+bars = axs[1].bar(metrics, values, color=['skyblue', 'limegreen', 'orange', 'tomato'], edgecolor='black', linewidth=1)
+
+# 在柱形图顶部添加数值标签
+for bar, value in zip(bars, values):
+    axs[1].text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 0.02, f"{value:.4f}",
+                ha='center', va='bottom', fontsize=12, color='black')
+
+# 设置子图2属性
+axs[1].set_ylim(0, 1.1)
+axs[1].set_title("Evaluation Metrics", fontsize=16)
+axs[1].set_xlabel("Metrics", fontsize=12)
+axs[1].set_ylabel("Values", fontsize=12)
+axs[1].grid(axis="y", linestyle="--", alpha=0.7)
+
+# 调整布局
+plt.tight_layout()
+plt.show()
