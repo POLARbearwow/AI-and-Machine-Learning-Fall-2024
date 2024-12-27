@@ -4,6 +4,7 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
+from sklearn import svm
 
 
 class SVM:
@@ -40,9 +41,9 @@ class SVM:
         approx = np.dot(X, self.w) + self.b
         return np.sign(approx)
 
-
+#lambda 错误分类？  
 class MultiClassSVM:
-    def __init__(self, learning_rate=0.001, lambda_param=0.01, max_iters=1000):
+    def __init__(self, learning_rate=0.01, lambda_param=0.0001, max_iters=1000):
         self.learning_rate = learning_rate
         self.lambda_param = lambda_param
         self.max_iters = max_iters
@@ -95,12 +96,27 @@ normalized_features = normalizer.fit_transform(features)
 X_train, X_test, y_train, y_test = train_test_split(normalized_features, target, test_size=0.3, random_state=42)
 
 # ----------------------------- Multi-Class SVM Training ----------------------------- #
-multi_svm = MultiClassSVM(learning_rate=0.00001, lambda_param=0.001, max_iters=10000)
+multi_svm = MultiClassSVM(learning_rate=0.0001, lambda_param=0.1, max_iters=10000)
 multi_svm.fit(X_train, y_train)
 
 # Predict
 y_pred = multi_svm.predict(X_test)
 
+#------------------------------- sklearn svm ---------------------------------#
+# clf = svm.SVC(kernel='rbf')
+# clf.fit(X_train, y_train)
+# y_pred = clf.predict(X_test)
+#linear kernel
+# Accuracy: 0.8889
+# Precision (macro): 0.8911
+# Recall (macro): 0.8887
+# F1 Score (macro): 0.8895
+
+#Gaussian kernal
+# Accuracy: 0.9048
+# Precision (macro): 0.9076
+# Recall (macro): 0.9053
+# F1 Score (macro): 0.9055
 # ----------------------------- Model Evaluation ----------------------------- #
 accuracy = accuracy_score(y_test, y_pred)
 precision = precision_score(y_test, y_pred, average='macro')
@@ -114,52 +130,60 @@ print(f"Recall (macro): {recall:.4f}")
 print(f"F1 Score (macro): {f1:.4f}")
 
 # ----------------------------- Visualization ----------------------------- #
+# 绘制损失函数随迭代次数的变化
+for idx, losses in enumerate(multi_svm.losses):
+    plt.plot(range(len(losses)), losses, label=f'Class {multi_svm.index_to_class[idx]}')
+plt.title('Loss Function over Iterations for Each Class')
+plt.xlabel('Iteration')
+plt.ylabel('Loss')
+plt.legend()
+plt.show()
 # ----------------------------- Visualization ----------------------------- #
-def plot_results_with_loss(X, y, model, class_label):
-    """
-    Plot decision boundary for a specific class in multi-class SVM and loss curve
-    :param X: Input features (only 2D features for visualization)
-    :param y: Labels
-    :param model: Multi-class SVM model
-    :param class_label: Specific class to visualize
-    """
-    binary_model = model.models[model.class_to_index[class_label]]  # Get binary classifier for the class
-    x0_min, x0_max = X[:, 0].min() - 0.1, X[:, 0].max() + 0.1
-    x1_min, x1_max = X[:, 1].min() - 0.1, X[:, 1].max() + 0.1
-    xx0, xx1 = np.meshgrid(np.arange(x0_min, x0_max, 0.01), np.arange(x1_min, x1_max, 0.01))
-    grid = np.c_[xx0.ravel(), xx1.ravel()]
+# def plot_results_with_loss(X, y, model, class_label):
+#     """
+#     Plot decision boundary for a specific class in multi-class SVM and loss curve
+#     :param X: Input features (only 2D features for visualization)
+#     :param y: Labels
+#     :param model: Multi-class SVM model
+#     :param class_label: Specific class to visualize
+#     """
+#     binary_model = model.models[model.class_to_index[class_label]]  # Get binary classifier for the class
+#     x0_min, x0_max = X[:, 0].min() - 0.1, X[:, 0].max() + 0.1
+#     x1_min, x1_max = X[:, 1].min() - 0.1, X[:, 1].max() + 0.1
+#     xx0, xx1 = np.meshgrid(np.arange(x0_min, x0_max, 0.01), np.arange(x1_min, x1_max, 0.01))
+#     grid = np.c_[xx0.ravel(), xx1.ravel()]
 
-    # Add extra dimensions to grid to match training feature size
-    if grid.shape[1] < binary_model.w.shape[0]:
-        additional_dims = np.zeros((grid.shape[0], binary_model.w.shape[0] - grid.shape[1]))
-        grid = np.hstack((grid, additional_dims))
+#     # Add extra dimensions to grid to match training feature size
+#     if grid.shape[1] < binary_model.w.shape[0]:
+#         additional_dims = np.zeros((grid.shape[0], binary_model.w.shape[0] - grid.shape[1]))
+#         grid = np.hstack((grid, additional_dims))
 
-    # Predict for the grid points
-    grid_predictions = binary_model.predict(grid)
-    grid_predictions = grid_predictions.reshape(xx0.shape)
+#     # Predict for the grid points
+#     grid_predictions = binary_model.predict(grid)
+#     grid_predictions = grid_predictions.reshape(xx0.shape)
 
-    # Create subplots
-    fig, axs = plt.subplots(1, 2, figsize=(16, 6))
+#     # Create subplots
+#     fig, axs = plt.subplots(1, 2, figsize=(16, 6))
 
-    # Subplot 1: Decision Boundary
-    axs[0].contourf(xx0, xx1, grid_predictions, alpha=0.8, cmap=plt.cm.coolwarm)
-    axs[0].scatter(X[:, 0], X[:, 1], c=y, cmap=plt.cm.coolwarm, edgecolors='k')
-    axs[0].set_title(f"Decision Boundary for Class {class_label}", fontsize=14)
-    axs[0].set_xlabel("Feature 1", fontsize=12)
-    axs[0].set_ylabel("Feature 2", fontsize=12)
+#     # Subplot 1: Decision Boundary
+#     axs[0].contourf(xx0, xx1, grid_predictions, alpha=0.8, cmap=plt.cm.coolwarm)
+#     axs[0].scatter(X[:, 0], X[:, 1], c=y, cmap=plt.cm.coolwarm, edgecolors='k')
+#     axs[0].set_title(f"Decision Boundary for Class {class_label}", fontsize=14)
+#     axs[0].set_xlabel("Feature 1", fontsize=12)
+#     axs[0].set_ylabel("Feature 2", fontsize=12)
 
-    # Subplot 2: Loss Curve
-    axs[1].plot(range(len(binary_model.losses)), binary_model.losses, label='Training Loss', color='blue')
-    axs[1].set_title("Loss Function Over Iterations", fontsize=14)
-    axs[1].set_xlabel("Iterations", fontsize=12)
-    axs[1].set_ylabel("Loss Value", fontsize=12)
-    axs[1].legend()
-    axs[1].grid(True)
+#     # Subplot 2: Loss Curve
+#     axs[1].plot(range(len(binary_model.losses)), binary_model.losses, label='Training Loss', color='blue')
+#     axs[1].set_title("Loss Function Over Iterations", fontsize=14)
+#     axs[1].set_xlabel("Iterations", fontsize=12)
+#     axs[1].set_ylabel("Loss Value", fontsize=12)
+#     axs[1].legend()
+#     axs[1].grid(True)
 
-    # Adjust layout
-    plt.tight_layout()
-    plt.show()
+#     # Adjust layout
+#     plt.tight_layout()
+#     plt.show()
 
-# Visualize decision boundary and loss for class 1
-plot_results_with_loss(X_test[:, :2], y_test, multi_svm, class_label=1)
+# #Visualize decision boundary and loss for class 1
+# plot_results_with_loss(X_test[:, :2], y_test, multi_svm, class_label=1)
 

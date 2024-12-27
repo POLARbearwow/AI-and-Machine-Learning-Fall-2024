@@ -3,6 +3,7 @@ import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
 # from matplotlib import rcParams
 # rcParams['font.sans-serif'] = ['SimHei']  
 # rcParams['axes.unicode_minus'] = False   
@@ -32,10 +33,9 @@ class SVM:
         self.w = np.zeros(n_features)
         self.b = 0
 
-        y = np.where(y <= 0, -1, 1)  # 将标签从 0, 1 转换为 -1, 1
+        # y = np.where(y ==1, 1, 0)  # 将标签从 0, 1 转换为 -1,
 
         for _ in range(self.max_iters):
-            loss = 0
             for idx, x_i in enumerate(X):
                 condition = y[idx] * (np.dot(x_i, self.w) + self.b) >= 1
                 if condition:
@@ -43,17 +43,24 @@ class SVM:
                 else:
                     self.w -= self.lr * (2 * self.lambda_param * self.w - np.dot(x_i, y[idx]))
                     self.b -= self.lr * y[idx]
-                    loss += 1 - y[idx] * (np.dot(x_i, self.w) + self.b)  # 合页损失
 
-            # 正则化项
-            loss += self.lambda_param * np.sum(self.w ** 2)
+        #    # 计算指数损失
+        #     exp_loss = np.exp(-y * (np.dot(X, self.w) + self.b))
+        #     loss = 0.5 * np.sum(self.w ** 2) + self.lambda_param * np.sum(exp_loss)
+            #hinge
+            hinge_loss = np.maximum(0, 1 - y * (np.dot(X, self.w) + self.b))
+            loss = 0.5 * np.sum(self.w ** 2) + self.lambda_param * np.sum(hinge_loss)
             self.losses.append(loss)
+            
+            # 打印损失
+            if _ % 100 == 0:  # 每100次输出一次损失
+                print(f"Iteration {_}, Loss: {loss}")
 
     def predict(self, X):
         """
         预测标签
-        :param X: 输入特征
-        :return: 预测标签
+        :param X: 输入特征 (m x n)
+        :return: 预测标签 (-1 或 1)
         """
         approx = np.dot(X, self.w) + self.b
         return np.sign(approx)
@@ -69,6 +76,10 @@ columns = [
 ]
 data.columns = columns
 
+#移除标签为 2 的数据
+data = data[data['class_label'] != 2]
+#print(data.head(-10))
+
 # 3. 分离特征和目标值
 features = data.iloc[:, :-1].values  # 除最后一列外的特征数据
 target = data.iloc[:, -1].values  # 最后一列为目标值
@@ -77,20 +88,26 @@ target = data.iloc[:, -1].values  # 最后一列为目标值
 normalizer = MinMaxScaler()
 normalized_features = normalizer.fit_transform(features)
 
-# 将目标值转换为二分类问题（以 1 类和其他类为例，构建二分类问题）
-binary_target = np.where(target == 1, 1, 0)
 
-# 5. 数据划分
-from sklearn.model_selection import train_test_split
-X_train, X_test, y_train, y_test = train_test_split(normalized_features, binary_target, test_size=0.3, random_state=42)
+# 6. 将目标值转换为二分类问题（以 1 类和其他类为例，构建二分类问题）
+binary_target = np.where(target == 1, 1, 0)  # 将类别 1 设置为 1，其它类别为 0
 
+# 7. 数据划分，保证类别分布一致
+X_train, X_test, y_train, y_test = train_test_split(
+    normalized_features, binary_target, test_size=0.3, random_state=42, stratify=binary_target
+)
 # ----------------------------- SVM 训练 ----------------------------- #
 # 创建 SVM 模型实例
-svm = SVM(learning_rate=0.001, lambda_param=0.01, max_iters=10000)
+svm = SVM(learning_rate=0.000001, lambda_param=0.01, max_iters=5000)
 svm.fit(X_train, y_train)
 
 # 预测
 y_pred = svm.predict(X_test)
+# 将预测结果从 -1 和 1 转换为 0 和 1
+
+#np.sign(approx)，即返回 -1 或 1   但是label是0和1的
+y_pred = np.where(y_pred == -1, 0, 1)
+
 
 # ----------------------------- 评估模型 ----------------------------- #
 accuracy = accuracy_score(y_test, y_pred)
