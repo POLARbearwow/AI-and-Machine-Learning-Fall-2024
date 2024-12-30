@@ -1,3 +1,6 @@
+''' Use the autoencoder to reduce the dimensionality of the dataset, with dimension
+ being 2 and 3, respectively'''
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -134,7 +137,7 @@ axes[0].legend()
 colors = ["purple", "green", "yellow"]  # 定义三种类别对应的颜色
 cmap = ListedColormap(colors)
 sc = axes[1].scatter(encoded_data[:, 0], encoded_data[:, 1], c=y, cmap=cmap, edgecolor="k")
-axes[1].set_title(f"Encoded Representation (2D) - Dimension: {latent_dim}")
+axes[1].set_title("Encoded Representation (Discrete Colors)")
 axes[1].set_xlabel("Encoded Dimension 1")
 axes[1].set_ylabel("Encoded Dimension 2")
 cb = fig.colorbar(sc, ax=axes[1], ticks=[1, 2, 3])

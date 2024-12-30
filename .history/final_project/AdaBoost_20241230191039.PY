@@ -138,33 +138,31 @@ print(f"Precision: {test_precision:.4f}")
 print(f"Recall: {test_recall:.4f}")
 print(f"F1 Score: {test_f1:.4f}")
 
+# 13. 绘制损失函数随迭代次数的变化
 fig, ax = plt.subplots(1, 2, figsize=(14, 6))
 
 # 子图 1: 测试集评估指标
 labels = ['Accuracy', 'Precision', 'Recall', 'F1 Score']
 test_scores = [test_accuracy, test_precision, test_recall, test_f1]
 
-# 自定义颜色列表
-colors = ['skyblue', 'limegreen', 'orange', 'tomato']
-
 # 绘制柱状图
-bars = ax[1].bar(labels, test_scores, color=colors, edgecolor='black')
-ax[1].set_xlabel('Metrics')
-ax[1].set_ylabel('Values')
-ax[1].set_title('Evaluation Metrics')
+ax[0].bar(labels, test_scores, color='r')
+ax[0].set_xlabel('Evaluation Metrics')
+ax[0].set_ylabel('Scores')
+ax[0].set_title('AdaBoost Test Performance')
 
 # 在柱子上添加数值
 for i, v in enumerate(test_scores):
-    ax[1].text(i, v + 0.02, f'{v:.4f}', ha='center', va='bottom', fontsize=10)
+    ax[0].text(i, v + 0.02, f'{v:.4f}', ha='center', va='bottom')
 
 # 子图 2: 绘制损失函数
-ax[0].plot(range(1, len(adaboost.losses) + 1), adaboost.losses, marker='o', color='blue', label='Training Loss', linewidth=2)
-ax[0].set_xlabel('Epoch')
-ax[0].set_ylabel('Loss')
-ax[0].set_title('Loss Curve')
-ax[0].legend()
-ax[0].grid()
+ax[1].plot(range(1, len(adaboost.losses) + 1), adaboost.losses, marker='o', label='Exponential Loss', color='b')
+ax[1].set_xlabel('Number of Estimators (T)')
+ax[1].set_ylabel('Loss')
+ax[1].set_title('Loss vs. Number of Estimators')
+ax[1].legend()
+ax[1].grid()
 
-# 调整图形布局
+# 显示图形
 plt.tight_layout()
 plt.show()

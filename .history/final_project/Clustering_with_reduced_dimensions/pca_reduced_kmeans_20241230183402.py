@@ -50,7 +50,7 @@ def initialize_centroids(X, k):
                 break
     return centroids
 
-def kmeans_plus_plus(X, k, max_iters=1000):
+def kmeans_plus_plus(X, k, max_iters=100):
     centroids = initialize_centroids(X, k)
     loss_history = []  # 用于记录每次迭代的损失
     for _ in range(max_iters):
@@ -80,41 +80,51 @@ centroids_pca, labels_pca, loss_history_pca = kmeans_plus_plus(pca_features, k)
 # Kernel PCA 降维后的 K-Means++
 centroids_kernel_pca, labels_kernel_pca, loss_history_kernel_pca = kmeans_plus_plus(kernel_pca_features, k)
 
-# ----------------------------- 可视化聚类结果与损失 ----------------------------- #
-fig, axs = plt.subplots(2, 2, figsize=(14, 10))
+# ----------------------------- 可视化聚类结果 ----------------------------- #
+plt.figure(figsize=(12, 6))
 
 # 子图 1: PCA 降维的聚类结果
+plt.subplot(1, 2, 1)
 colors = ['r', 'g', 'b']
 for i in range(k):
-    axs[0, 0].scatter(pca_features[labels_pca == i, 0], pca_features[labels_pca == i, 1], 
-                      s=50, c=colors[i], label=f'Cluster {i+1}')
-axs[0, 0].scatter(centroids_pca[:, 0], centroids_pca[:, 1], s=300, c='yellow', marker='*', label='Centroids')
-axs[0, 0].set_title('K-Means++ on PCA Features')
-axs[0, 0].legend()
+    plt.scatter(pca_features[labels_pca == i, 0], pca_features[labels_pca == i, 1], 
+                s=50, c=colors[i], label=f'Cluster {i+1}')
+plt.scatter(centroids_pca[:, 0], centroids_pca[:, 1], s=300, c='yellow', marker='*', label='Centroids')
+plt.title('K-Means++ on PCA Features')
+plt.legend()
 
 # 子图 2: Kernel PCA 降维的聚类结果
+plt.subplot(1, 2, 2)
 for i in range(k):
-    axs[0, 1].scatter(kernel_pca_features[labels_kernel_pca == i, 0], kernel_pca_features[labels_kernel_pca == i, 1], 
-                      s=50, c=colors[i], label=f'Cluster {i+1}')
-axs[0, 1].scatter(centroids_kernel_pca[:, 0], centroids_kernel_pca[:, 1], s=300, c='yellow', marker='*', label='Centroids')
-axs[0, 1].set_title('K-Means++ on Kernel PCA Features')
-axs[0, 1].legend()
+    plt.scatter(kernel_pca_features[labels_kernel_pca == i, 0], kernel_pca_features[labels_kernel_pca == i, 1], 
+                s=50, c=colors[i], label=f'Cluster {i+1}')
+plt.scatter(centroids_kernel_pca[:, 0], centroids_kernel_pca[:, 1], s=300, c='yellow', marker='*', label='Centroids')
+plt.title('K-Means++ on Kernel PCA Features')
+plt.legend()
+
+plt.tight_layout()
+plt.show()
+
+# ----------------------------- 可视化损失曲线 ----------------------------- #
+plt.figure(figsize=(12, 6))
 
 # 子图 3: PCA 聚类损失变化
-axs[1, 0].plot(loss_history_pca, marker='o', color='blue', label='Loss')
-axs[1, 0].set_title('Loss vs Iterations (PCA)')
-axs[1, 0].set_xlabel('Iterations')
-axs[1, 0].set_ylabel('Loss')
-axs[1, 0].grid(True)
-axs[1, 0].legend()
+plt.subplot(1, 2, 1)
+plt.plot(loss_history_pca, marker='o', color='blue', label='Loss')
+plt.title('Loss vs Iterations (PCA)')
+plt.xlabel('Iterations')
+plt.ylabel('Loss')
+plt.grid(True)
+plt.legend()
 
 # 子图 4: Kernel PCA 聚类损失变化
-axs[1, 1].plot(loss_history_kernel_pca, marker='o', color='orange', label='Loss')
-axs[1, 1].set_title('Loss vs Iterations (Kernel PCA)')
-axs[1, 1].set_xlabel('Iterations')
-axs[1, 1].set_ylabel('Loss')
-axs[1, 1].grid(True)
-axs[1, 1].legend()
+plt.subplot(1, 2, 2)
+plt.plot(loss_history_kernel_pca, marker='o', color='orange', label='Loss')
+plt.title('Loss vs Iterations (Kernel PCA)')
+plt.xlabel('Iterations')
+plt.ylabel('Loss')
+plt.grid(True)
+plt.legend()
 
 plt.tight_layout()
 plt.show()

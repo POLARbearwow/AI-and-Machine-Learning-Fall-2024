@@ -105,7 +105,7 @@ class NonLinearAutoencoder:
 # **3. 初始化与训练模型**
 input_dim = X_train.shape[1]  # 原始数据特征数
 hidden_dim = 30  # 隐藏层神经元数量
-latent_dim = 3  # 降维到 2 维
+latent_dim = 2  # 降维到 2 维
 autoencoder = NonLinearAutoencoder(input_dim, hidden_dim, latent_dim)
 
 # 训练模型并获取损失值

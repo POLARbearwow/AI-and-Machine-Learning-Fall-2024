@@ -134,44 +134,7 @@ plt.xlim(x_min, x_max)
 plt.ylim(y_min, y_max)
 plt.title('SVC with Gaussian kernel (0-1 view)')
 
-# ----------------------------- 绘制评估结果的柱状图 ----------------------------- #
 
-# 创建数据
-labels = ['Accuracy', 'Precision', 'Recall', 'F1 Score']
-linear_svc_scores = [accuracy_linear, precision_linear, recall_linear, f1_linear]
-kernel_svc_scores = [accuracy_kernel, precision_kernel, recall_kernel, f1_kernel]
-
-# 设置柱状图的位置和宽度
-x = np.arange(len(labels))  # 标签的数量
-width = 0.35  # 每个柱子的宽度
-
-# 创建图形
-fig, ax = plt.subplots(figsize=(10, 6))
-
-# 绘制柱状图
-bars1 = ax.bar(x - width/2, linear_svc_scores, width, label='BiLinearSVC', color='b')
-bars2 = ax.bar(x + width/2, kernel_svc_scores, width, label='BiKernelSVC', color='r')
-
-# 添加标签和标题
-ax.set_xlabel('Evaluation Metrics')
-ax.set_ylabel('Scores')
-ax.set_title('Comparison of BiLinearSVC and BiKernelSVC')
-ax.set_xticks(x)
-ax.set_xticklabels(labels)
-ax.legend()
-
-# 显示每个柱子的数值
-def add_labels(bars):
-    for bar in bars:
-        yval = bar.get_height()
-        ax.text(bar.get_x() + bar.get_width()/2, yval + 0.02, f'{yval:.4f}', ha='center', va='bottom')
-
-add_labels(bars1)
-add_labels(bars2)
-
-# 显示图形
-plt.tight_layout()
-# plt.show()
 
 plt.show()
 

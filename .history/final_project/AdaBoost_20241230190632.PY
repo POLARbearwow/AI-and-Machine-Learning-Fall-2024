@@ -118,53 +118,90 @@ class AdaBoost:
 y_train_binary = np.where(y_train == 0, 1, -1)
 y_test_binary = np.where(y_test == 0, 1, -1)
 
+# 检查类别分布
+print("Training class distribution:", Counter(y_train_binary))
+print("Test class distribution:", Counter(y_test_binary))
+
 # 10. 训练 AdaBoost 模型
 adaboost = AdaBoost(n_estimators=50)
 adaboost.fit(X_train, y_train_binary)
 
 # 11. 预测
+y_pred_train = adaboost.predict(X_train)
 y_pred_test = adaboost.predict(X_test)
 
-# 12. 评估模型性能
+# 12. 检查预测值分布
+print("Train predictions distribution:", Counter(y_pred_train))
+print("Test predictions distribution:", Counter(y_pred_test))
+
+# 13. 评估模型性能
+train_accuracy = accuracy_score(y_train_binary, y_pred_train)
 test_accuracy = accuracy_score(y_test_binary, y_pred_test)
+
+train_precision = precision_score(y_train_binary, y_pred_train, zero_division=0)
 test_precision = precision_score(y_test_binary, y_pred_test, zero_division=0)
+
+train_recall = recall_score(y_train_binary, y_pred_train, zero_division=0)
 test_recall = recall_score(y_test_binary, y_pred_test, zero_division=0)
+
+train_f1 = f1_score(y_train_binary, y_pred_train, zero_division=0)
 test_f1 = f1_score(y_test_binary, y_pred_test, zero_division=0)
 
-# 打印测试集性能结果
+# 打印性能结果
+print("\nTraining Performance:")
+print(f"Accuracy: {train_accuracy:.4f}")
+print(f"Precision: {train_precision:.4f}")
+print(f"Recall: {train_recall:.4f}")
+print(f"F1 Score: {train_f1:.4f}")
+
 print("\nTest Performance:")
 print(f"Accuracy: {test_accuracy:.4f}")
 print(f"Precision: {test_precision:.4f}")
 print(f"Recall: {test_recall:.4f}")
 print(f"F1 Score: {test_f1:.4f}")
 
-fig, ax = plt.subplots(1, 2, figsize=(14, 6))
+# 14. 绘制损失函数随迭代次数的变化
+plt.figure(figsize=(10, 6))
+plt.plot(range(1, len(adaboost.losses) + 1), adaboost.losses, marker='o', label='Exponential Loss')
+plt.xlabel('Number of Estimators (T)')
+plt.ylabel('Loss')
+plt.title('Exponential Loss vs. Number of Estimators')
+plt.legend()
+plt.grid()
+plt.show()
 
-# 子图 1: 测试集评估指标
+# 15. 绘制评估指标的柱状图
 labels = ['Accuracy', 'Precision', 'Recall', 'F1 Score']
+train_scores = [train_accuracy, train_precision, train_recall, train_f1]
 test_scores = [test_accuracy, test_precision, test_recall, test_f1]
 
-# 自定义颜色列表
-colors = ['skyblue', 'limegreen', 'orange', 'tomato']
+x = np.arange(len(labels))  # 标签的位置
+width = 0.35  # 每个柱子的宽度
+
+# 创建图形
+fig, ax = plt.subplots(figsize=(10, 6))
 
 # 绘制柱状图
-bars = ax[1].bar(labels, test_scores, color=colors, edgecolor='black')
-ax[1].set_xlabel('Metrics')
-ax[1].set_ylabel('Values')
-ax[1].set_title('Evaluation Metrics')
+bars1 = ax.bar(x - width/2, train_scores, width, label='Train', color='b')
+bars2 = ax.bar(x + width/2, test_scores, width, label='Test', color='r')
 
-# 在柱子上添加数值
-for i, v in enumerate(test_scores):
-    ax[1].text(i, v + 0.02, f'{v:.4f}', ha='center', va='bottom', fontsize=10)
+# 添加标签和标题
+ax.set_xlabel('Evaluation Metrics')
+ax.set_ylabel('Scores')
+ax.set_title('AdaBoost Performance Comparison: Train vs Test')
+ax.set_xticks(x)
+ax.set_xticklabels(labels)
+ax.legend()
 
-# 子图 2: 绘制损失函数
-ax[0].plot(range(1, len(adaboost.losses) + 1), adaboost.losses, marker='o', color='blue', label='Training Loss', linewidth=2)
-ax[0].set_xlabel('Epoch')
-ax[0].set_ylabel('Loss')
-ax[0].set_title('Loss Curve')
-ax[0].legend()
-ax[0].grid()
+# 显示每个柱子的数值
+def add_labels(bars):
+    for bar in bars:
+        yval = bar.get_height()
+        ax.text(bar.get_x() + bar.get_width()/2, yval + 0.02, f'{yval:.4f}', ha='center', va='bottom')
 
-# 调整图形布局
+add_labels(bars1)
+add_labels(bars2)
+
+# 显示图形
 plt.tight_layout()
 plt.show()

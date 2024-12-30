@@ -171,7 +171,7 @@ add_labels(bars2)
 
 # 显示图形
 plt.tight_layout()
-# plt.show()
+plt.show()
 
 plt.show()
 

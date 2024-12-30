@@ -150,20 +150,20 @@ colors = ['skyblue', 'limegreen', 'orange', 'tomato']
 # 绘制柱状图
 bars = ax[1].bar(labels, test_scores, color=colors, edgecolor='black')
 ax[1].set_xlabel('Metrics')
-ax[1].set_ylabel('Values')
-ax[1].set_title('Evaluation Metrics')
+ax[0].set_ylabel('Values')
+ax[0].set_title('Evaluation Metrics')
 
 # 在柱子上添加数值
 for i, v in enumerate(test_scores):
-    ax[1].text(i, v + 0.02, f'{v:.4f}', ha='center', va='bottom', fontsize=10)
+    ax[0].text(i, v + 0.02, f'{v:.4f}', ha='center', va='bottom', fontsize=10)
 
 # 子图 2: 绘制损失函数
-ax[0].plot(range(1, len(adaboost.losses) + 1), adaboost.losses, marker='o', color='blue', label='Training Loss', linewidth=2)
-ax[0].set_xlabel('Epoch')
-ax[0].set_ylabel('Loss')
-ax[0].set_title('Loss Curve')
-ax[0].legend()
-ax[0].grid()
+ax[1].plot(range(1, len(adaboost.losses) + 1), adaboost.losses, marker='o', color='blue', label='Training Loss', linewidth=2)
+ax[1].set_xlabel('Epoch')
+ax[1].set_ylabel('Loss')
+ax[1].set_title('Loss Curve')
+ax[1].legend()
+ax[1].grid()
 
 # 调整图形布局
 plt.tight_layout()

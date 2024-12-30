@@ -50,82 +50,64 @@ def initialize_centroids(X, k):
                 break
     return centroids
 
-def kmeans_plus_plus(X, k, max_iters=1000):
+def kmeans_plus_plus(X, k, max_iters=100):
     centroids = initialize_centroids(X, k)
-    loss_history = []  # 用于记录每次迭代的损失
     for _ in range(max_iters):
-        # 计算每个样本到每个质心的距离
         distances = np.array([np.linalg.norm(X - centroid, axis=1) for centroid in centroids])
         labels = np.argmin(distances, axis=0)
-        
-        # 计算损失
-        loss = np.sum([np.linalg.norm(X[labels == i] - centroids[i], axis=1).sum() for i in range(k)])
-        loss_history.append(loss)
-
-        # 更新质心
         new_centroids = np.array([X[labels == i].mean(axis=0) for i in range(k)])
-        
-        # 如果质心没有变化，则停止迭代
         if np.all(centroids == new_centroids):
             break
         centroids = new_centroids
-    return centroids, labels, loss_history
+    return centroids, labels
 
 # 设置聚类数
 k = 3
 
 # PCA 降维后的 K-Means++
-centroids_pca, labels_pca, loss_history_pca = kmeans_plus_plus(pca_features, k)
+centroids_pca, labels_pca = kmeans_plus_plus(pca_features, k)
+silhouette_pca = silhouette_score(pca_features, labels_pca)
+ari_pca = adjusted_rand_score(target, labels_pca)
+nmi_pca = normalized_mutual_info_score(target, labels_pca)
 
 # Kernel PCA 降维后的 K-Means++
-centroids_kernel_pca, labels_kernel_pca, loss_history_kernel_pca = kmeans_plus_plus(kernel_pca_features, k)
+centroids_kernel_pca, labels_kernel_pca = kmeans_plus_plus(kernel_pca_features, k)
+silhouette_kernel_pca = silhouette_score(kernel_pca_features, labels_kernel_pca)
+ari_kernel_pca = adjusted_rand_score(target, labels_kernel_pca)
+nmi_kernel_pca = normalized_mutual_info_score(target, labels_kernel_pca)
 
-# ----------------------------- 可视化聚类结果与损失 ----------------------------- #
-fig, axs = plt.subplots(2, 2, figsize=(14, 10))
+# ----------------------------- 可视化聚类结果 ----------------------------- #
+plt.figure(figsize=(12, 6))
 
 # 子图 1: PCA 降维的聚类结果
+plt.subplot(1, 2, 1)
 colors = ['r', 'g', 'b']
 for i in range(k):
-    axs[0, 0].scatter(pca_features[labels_pca == i, 0], pca_features[labels_pca == i, 1], 
-                      s=50, c=colors[i], label=f'Cluster {i+1}')
-axs[0, 0].scatter(centroids_pca[:, 0], centroids_pca[:, 1], s=300, c='yellow', marker='*', label='Centroids')
-axs[0, 0].set_title('K-Means++ on PCA Features')
-axs[0, 0].legend()
+    plt.scatter(pca_features[labels_pca == i, 0], pca_features[labels_pca == i, 1], 
+                s=50, c=colors[i], label=f'Cluster {i+1}')
+plt.scatter(centroids_pca[:, 0], centroids_pca[:, 1], s=300, c='yellow', marker='*', label='Centroids')
+plt.title('K-Means++ on PCA Features')
+plt.legend()
 
 # 子图 2: Kernel PCA 降维的聚类结果
+plt.subplot(1, 2, 2)
 for i in range(k):
-    axs[0, 1].scatter(kernel_pca_features[labels_kernel_pca == i, 0], kernel_pca_features[labels_kernel_pca == i, 1], 
-                      s=50, c=colors[i], label=f'Cluster {i+1}')
-axs[0, 1].scatter(centroids_kernel_pca[:, 0], centroids_kernel_pca[:, 1], s=300, c='yellow', marker='*', label='Centroids')
-axs[0, 1].set_title('K-Means++ on Kernel PCA Features')
-axs[0, 1].legend()
-
-# 子图 3: PCA 聚类损失变化
-axs[1, 0].plot(loss_history_pca, marker='o', color='blue', label='Loss')
-axs[1, 0].set_title('Loss vs Iterations (PCA)')
-axs[1, 0].set_xlabel('Iterations')
-axs[1, 0].set_ylabel('Loss')
-axs[1, 0].grid(True)
-axs[1, 0].legend()
-
-# 子图 4: Kernel PCA 聚类损失变化
-axs[1, 1].plot(loss_history_kernel_pca, marker='o', color='orange', label='Loss')
-axs[1, 1].set_title('Loss vs Iterations (Kernel PCA)')
-axs[1, 1].set_xlabel('Iterations')
-axs[1, 1].set_ylabel('Loss')
-axs[1, 1].grid(True)
-axs[1, 1].legend()
+    plt.scatter(kernel_pca_features[labels_kernel_pca == i, 0], kernel_pca_features[labels_kernel_pca == i, 1], 
+                s=50, c=colors[i], label=f'Cluster {i+1}')
+plt.scatter(centroids_kernel_pca[:, 0], centroids_kernel_pca[:, 1], s=300, c='yellow', marker='*', label='Centroids')
+plt.title('K-Means++ on Kernel PCA Features')
+plt.legend()
 
 plt.tight_layout()
 plt.show()
 
-# ----------------------------- 打印评估结果 ----------------------------- #
+# ----------------------------- 打印结果 ----------------------------- #
 print("PCA 降维后的聚类结果:")
-print(f"轮廓系数 (Silhouette Score): {silhouette_score(pca_features, labels_pca):.4f}")
-print(f"调整兰德指数 (Adjusted Rand Index): {adjusted_rand_score(target, labels_pca):.4f}")
-print(f"归一化互信息 (Normalized Mutual Information): {normalized_mutual_info_score(target, labels_pca):.4f}")
+print(f"轮廓系数 (Silhouette Score): {silhouette_pca:.4f}")
+print(f"调整兰德指数 (Adjusted Rand Index): {ari_pca:.4f}")
+print(f"互信息 (Normalized Mutual Information): {nmi_pca:.4f}")
 
 print("\nKernel PCA 降维后的聚类结果:")
-print(f"轮廓系数 (Silhouette Score): {silhouette_score(kernel_pca_features, labels_kernel_pca):.4f}")
-print(f"调整兰德指数 (Adjusted Rand Index): {adjusted_rand_score(target, labels_kernel_pca):.4f}")
-print(f"归一化互信息 (Normalized Mutual Information): {normalized_mutual_info_score(target, labels_kernel_pca):.4f}")
+print(f"轮廓系数 (Silhouette Score): {silhouette_kernel_pca:.4f}")
+print(f"调整兰德指数 (Adjusted Rand Index): {ari_kernel_pca:.4f}")
+print(f"互信息 (Normalized Mutual Information): {nmi_kernel_pca:.4f}")

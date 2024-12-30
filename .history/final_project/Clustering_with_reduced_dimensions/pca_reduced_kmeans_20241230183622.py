@@ -50,7 +50,7 @@ def initialize_centroids(X, k):
                 break
     return centroids
 
-def kmeans_plus_plus(X, k, max_iters=1000):
+def kmeans_plus_plus(X, k, max_iters=100):
     centroids = initialize_centroids(X, k)
     loss_history = []  # 用于记录每次迭代的损失
     for _ in range(max_iters):
